@@ -1,30 +1,26 @@
 from django.shortcuts import render
+from django.utils import encoding #smart_unicode
+from urllib.parse import parse_qsl
 
 from .models import Service
 
 # Create your views here.
 def services(req):
-    services = Service.objects.all()
-    for s in services:
-        print(s)
     if req.method == 'POST':
-        print('ร้องขอแบบ POST')
-        print(req.body)
-        txt = str(req.body)[2:-1]
-        d = {}
-        for p in txt.split('&'):
-            print(p)
-            kv = p.split('=')
-            #key,value = kv[0], kv[1]
-            d[kv[0]] = kv[1]
+        post = req.POST
         s = Service()
-        s.icon = d['icon']
-        s.title = d['title']
-        s.detail = d['detail']
+        s.icon = post['icon']
+        s.title = post['title']
+        s.detail = post['detail']
         s.save()
+        services = Service.objects.all()
+        print(services)
+        return render(req, 'linuxapp/services.html', { 'services': services })
     else:
         print('ร้องขอทำมะดา')
-    return render(req, 'linuxapp/services.html', { 'service': services })
+        services = Service.objects.all()
+        print(services)
+        return render(req, 'linuxapp/services.html', { 'services': services })
 
 def index(req):
     return render(req, 'linuxapp/index.html')
